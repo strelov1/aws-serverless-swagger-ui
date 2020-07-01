@@ -1,0 +1,42 @@
+{
+  "author": {
+    "name": "Klaus Lochmann",
+    "email": "klaus.lochmann@gmail.com"
+  },
+  "bugs": {
+    "url": "https://github.com/klauslochmann/swagger-ui-aws-apigateway/issues"
+  },
+  "bundleDependencies": false,
+  "dependencies": {
+    "swagger-ui-dist": "^3.18.1",
+	"fs": "0.0.1-security"
+  },
+  "deprecated": false,
+  "description": "Swagger UI AWS API Gateway",
+  "engines": {
+    "node": ">= v0.10.32"
+  },
+  "files": [
+    "package.json",
+    "index.js",
+    "LICENSE"
+  ],
+  "homepage": "https://github.com/klauslochmann/swagger-ui-aws-apigateway",
+  "keywords": [
+    "swagger",
+	"api gateway",
+	"aws",
+    "ui",
+    "json",
+    "documentation"
+  ],
+  "license": "MIT",
+  "main": "./index.js",
+  "name": "swagger-ui-aws-apigateway",
+  "private": false,
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/klauslochmann/swagger-ui-aws-apigateway.git"
+  },
+  "version": "1.0.0"
+}
