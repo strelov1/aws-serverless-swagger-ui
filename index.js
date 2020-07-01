@@ -204,7 +204,7 @@ var setup = function (swaggerDoc) {
         "statusCode": 301,
         "isBase64Encoded": false,
         "headers": {
-          "Location": event.path + "/"
+          "Location": "api-docs/"
         }
       });
       return;
