@@ -1,56 +1,54 @@
-# Swagger UI AWS API Gateway
+# AWS Serverless Swagger UI
 
-This module is branched from [swagger-ui-express](https://www.npmjs.com/package/swagger-ui-express). It allows you to serve auto-generated [swagger-ui](https://swagger.io/tools/swagger-ui/) generated API docs from the AWS API Gateway. It uses Lambda functions to generate the API docs based on a `swagger.json` or `swagger.yaml` file. The result is living documentation for your API hosted on your AWS API Gateway.
+This module allows you to serve auto-generated [swagger-ui](https://swagger.io/tools/swagger-ui/) API docs 
+from the AWS API Gateway. 
+It uses Lambda functions to generate the API docs based on a swagger/open-api yaml file. 
+The result is living documentation for your API hosted on your AWS API Gateway.
 
-Swagger version is pulled from npm module swagger-ui-dist. Please use a lock file or specify the version of swagger-ui-dist you want to ensure it is consistent across environments.
+Initially based upon [swagger-ui-aws-apigateway](https://github.com/klauslochmann/swagger-ui-aws-apigateway),
+this version focus on :
+* simplify the code base.
+* speed up rendering
+* update code with ES6 syntax including async handler.
+* reduce the number of HTTP requests.
+* accept any filename in `.yaml` for the definition, not only `interface.yaml`.
+* allow the path to be whatever you want, not limited to `/api-docs` (see [Restrictions](#restrictions)).
+* fix media files rendering in base64.
 
-You may be also interested in:
+## Install
 
-* [swagger tools](https://github.com/swagger-api): Various tools, including swagger editor, swagger code gen etc.
+```bash
+npm install aws-serverless-swagger-ui
+```
 
 ## Usage
 
-Install using npm:
-
-```bash
-$ npm install swagger-ui-aws-apigateway
-```
-
 Configure your API Gateway:
-* Create a resource of type "proxy resource"
+* Create a resource which will serve your sagger UI (ex: /docs)
+* Create a resource of type "proxy resource" (ex: /docs/{proxy+})
 * Create a method ANY
 * Create a lambda function of type "LAMBDA_PROXY"
 
 In your AWS lambda function, include this package as follows:
 
 ```javascript
-const swaggerUi = require('swagger-ui-aws-apigateway');
-const fs = require('fs');
+const swaggerUi = require('aws-serverless-swagger-ui');
+const swaggerHandler = swaggerUi.setup('swagger.yaml');
 
-// read your yaml file and initialize
-const swaggerDocument = fs.readFileSync('./interface/service_interface.yaml');
-var swaggerHandler = swaggerUi.setup(swaggerDocument);
 
-// call the swagger api doc in your handler
-
-exports.handler = (event, context, callback) => {
-
-   if (event.path.includes("/api-docs")) {
-        console.log("Got request to the api docs.");
-        swaggerHandler(event, context, callback);
-        return;
-    }
-
-    // ... your other code ...
-
+exports.handler = async (event, context, callback) => {
+    return (await swaggerHandler)(event, context, callback);
 }
 ```
 
+Once deployed, access your swagger ui at : `https://your-api-gateway-endpoint/your-mount-path/index.html`
+
+
 ## Restrictions
 
-Currently the path in the url must be named "api-docs".
+Because API Gateway doesn't match the root folder with {proxy+} definition, your default URL should contain index.html.
+We suggest creating a mock integration on your main folder to return a 301. (ex: /docs => 301 => /docs/index.html)
 
-## Requirements
+## Logs
 
-* Node v0.10.32 or above
-
+You can print some logs by setting the Environment Variable `DEBUG`

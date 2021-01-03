@@ -1,21 +1,22 @@
 'use strict'
 
-const fs = require('fs');
-var swaggerUi = require('swagger-ui-dist')
-var favIconHtml = '<link rel="icon" type="image/png" href="./favicon-32x32.png" sizes="32x32" />' +
-  '<link rel="icon" type="image/png" href="./favicon-16x16.png" sizes="16x16" />'
-var swaggerInit = ''
+const fs = require('fs').promises;
+const path = require('path');
+const swaggerUi = require('swagger-ui-dist');
+const absolutePath = swaggerUi.getAbsoluteFSPath();
+const debug = (msg) => {
+    process.env.DEBUG ? console.log(msg) : null
+}
 
-var htmlTplString = `
+const htmlTplString = (swaggerUiInit, faviconEncoded) => `
 <!-- HTML for static distribution bundle build -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title><% title %></title>
+  <title>Swagger UI</title>
   <link rel="stylesheet" type="text/css" href="./swagger-ui.css" >
-  <% favIconString %>
-  <% customJs %>
+  <link rel="icon" href="data:image/png;base64,${faviconEncoded}" />
   <style>
     html
     {
@@ -23,6 +24,7 @@ var htmlTplString = `
       overflow: -moz-scrollbars-vertical;
       overflow-y: scroll;
     }
+    
     *,
     *:before,
     *:after
@@ -39,72 +41,22 @@ var htmlTplString = `
 
 <body>
 
-<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" style="position:absolute;width:0;height:0">
-  <defs>
-    <symbol viewBox="0 0 20 20" id="unlocked">
-      <path d="M15.8 8H14V5.6C14 2.703 12.665 1 10 1 7.334 1 6 2.703 6 5.6V6h2v-.801C8 3.754 8.797 3 10 3c1.203 0 2 .754 2 2.199V8H4c-.553 0-1 .646-1 1.199V17c0 .549.428 1.139.951 1.307l1.197.387C5.672 18.861 6.55 19 7.1 19h5.8c.549 0 1.428-.139 1.951-.307l1.196-.387c.524-.167.953-.757.953-1.306V9.199C17 8.646 16.352 8 15.8 8z"></path>
-    </symbol>
-
-    <symbol viewBox="0 0 20 20" id="locked">
-      <path d="M15.8 8H14V5.6C14 2.703 12.665 1 10 1 7.334 1 6 2.703 6 5.6V8H4c-.553 0-1 .646-1 1.199V17c0 .549.428 1.139.951 1.307l1.197.387C5.672 18.861 6.55 19 7.1 19h5.8c.549 0 1.428-.139 1.951-.307l1.196-.387c.524-.167.953-.757.953-1.306V9.199C17 8.646 16.352 8 15.8 8zM12 8H8V5.199C8 3.754 8.797 3 10 3c1.203 0 2 .754 2 2.199V8z"/>
-    </symbol>
-
-    <symbol viewBox="0 0 20 20" id="close">
-      <path d="M14.348 14.849c-.469.469-1.229.469-1.697 0L10 11.819l-2.651 3.029c-.469.469-1.229.469-1.697 0-.469-.469-.469-1.229 0-1.697l2.758-3.15-2.759-3.152c-.469-.469-.469-1.228 0-1.697.469-.469 1.228-.469 1.697 0L10 8.183l2.651-3.031c.469-.469 1.228-.469 1.697 0 .469.469.469 1.229 0 1.697l-2.758 3.152 2.758 3.15c.469.469.469 1.229 0 1.698z"/>
-    </symbol>
-
-    <symbol viewBox="0 0 20 20" id="large-arrow">
-      <path d="M13.25 10L6.109 2.58c-.268-.27-.268-.707 0-.979.268-.27.701-.27.969 0l7.83 7.908c.268.271.268.709 0 .979l-7.83 7.908c-.268.271-.701.27-.969 0-.268-.269-.268-.707 0-.979L13.25 10z"/>
-    </symbol>
-
-    <symbol viewBox="0 0 20 20" id="large-arrow-down">
-      <path d="M17.418 6.109c.272-.268.709-.268.979 0s.271.701 0 .969l-7.908 7.83c-.27.268-.707.268-.979 0l-7.908-7.83c-.27-.268-.27-.701 0-.969.271-.268.709-.268.979 0L10 13.25l7.418-7.141z"/>
-    </symbol>
-
-
-    <symbol viewBox="0 0 24 24" id="jump-to">
-      <path d="M19 7v4H5.83l3.58-3.59L8 6l-6 6 6 6 1.41-1.41L5.83 13H21V7z"/>
-    </symbol>
-
-    <symbol viewBox="0 0 24 24" id="expand">
-      <path d="M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z"/>
-    </symbol>
-
-  </defs>
-</svg>
-
 <div id="swagger-ui"></div>
 
 <script src="./swagger-ui-bundle.js"> </script>
 <script src="./swagger-ui-standalone-preset.js"> </script>
-<script src="./swagger-ui-init.js"> </script>
-<% customCssUrl %>
-<style>
-  <% customCss %>
-</style>
+<script>
+${swaggerUiInit}
+</script>
+
 </body>
-
 </html>
-`
+`;
 
-var jsTplString = `
+const jsTplString = (url) => `
 window.onload = function() {
-  // Build a system
-  var url = window.location.search.match(/url=([^&]+)/);
-  if (url && url.length > 1) {
-    url = decodeURIComponent(url[1]);
-  } else {
-    url = window.location.origin;
-  }
-  <% swaggerOptions %>
-  url = options.swaggerUrl || url
-  var urls = options.swaggerUrls
-  var customOptions = options.customOptions
-  var spec1 = options.swaggerDoc
-  var swaggerOptions = {
-    spec: spec1,
-    url: url,
-    urls: urls,
+  const ui = SwaggerUIBundle({
+    url: '${url}',
     dom_id: '#swagger-ui',
     deepLinking: true,
     presets: [
@@ -115,208 +67,88 @@ window.onload = function() {
       SwaggerUIBundle.plugins.DownloadUrl
     ],
     layout: "StandaloneLayout"
-  }
-  for (var attrname in customOptions) {
-    swaggerOptions[attrname] = customOptions[attrname];
-  }
-  var ui = SwaggerUIBundle(swaggerOptions)
-
-  if (customOptions.oauth) {
-    ui.initOAuth(customOptions.oauth)
-  }
-
-  if (customOptions.authAction) {
-    ui.authActions.authorize(customOptions.authAction)
-  }
+  });
 
   window.ui = ui
 }
-`
+`;
 
-var generateHTML = function (swaggerDoc, opts, options, customCss, customfavIcon, swaggerUrl, customSiteTitle, _htmlTplString, _jsTplString) {
-  var isExplorer
-  var customJs
-  var swaggerUrls
-  var customCssUrl
-  if (opts && typeof opts === 'object') {
-    options = opts.swaggerOptions
-    customCss = opts.customCss
-    customJs = opts.customJs
-    customfavIcon = opts.customfavIcon
-    swaggerUrl = opts.swaggerUrl
-    swaggerUrls = opts.swaggerUrls
-    isExplorer = opts.explorer || !!swaggerUrls
-    customSiteTitle = opts.customSiteTitle
-    customCssUrl = opts.customCssUrl
-  } else {
-    //support legacy params based function
-    isExplorer = opts
-  }
-  options = options || {}
-  var explorerString = isExplorer ? '' : '.swagger-ui .topbar .download-url-wrapper { display: none }'
-  customCss = explorerString + ' ' + customCss || explorerString
-  customfavIcon = customfavIcon || false
-  customSiteTitle = customSiteTitle || 'Swagger UI'
-  _htmlTplString = _htmlTplString || htmlTplString
-  _jsTplString = _jsTplString || jsTplString
-
-  var favIconString = customfavIcon ? '<link rel="icon" href="' + customfavIcon + '" />' : favIconHtml
-  var htmlWithCustomCss = _htmlTplString.toString().replace('<% customCss %>', customCss)
-  var htmlWithFavIcon = htmlWithCustomCss.replace('<% favIconString %>', favIconString)
-  var htmlWithCustomJs = htmlWithFavIcon.replace('<% customJs %>', customJs ? `<script src="${customJs}"></script>` : '')
-  var htmlWithCustomCssUrl = htmlWithCustomJs.replace('<% customCssUrl %>', customCssUrl ? `<link href="${customCssUrl}" rel="stylesheet">` : '')
-
-  var initOptions = {
-    swaggerDoc: swaggerDoc || undefined,
-    customOptions: options,
-    swaggerUrl: swaggerUrl || undefined,
-    swaggerUrls: swaggerUrls || undefined
-  }
-
-  swaggerInit = _jsTplString.toString().replace('<% swaggerOptions %>', stringify(initOptions))
-  return htmlWithCustomCssUrl.replace('<% title %>', customSiteTitle)
-}
-
-var stringify = function (obj, prop) {
-  var placeholder = '____FUNCTIONPLACEHOLDER____'
-  var fns = []
-  var json = JSON.stringify(obj, function (key, value) {
-    if (typeof value === 'function') {
-      fns.push(value)
-      return placeholder
+const contentType = (ext) => {
+    switch (ext) {
+        case '.js':
+            return 'application/javascript';
+        case '.html':
+            return 'text/html';
+        case '.css':
+            return 'text/css';
+        default:
+            return 'text/plain';
     }
-    return value
-  }, 2)
-  json = json.replace(new RegExp('"' + placeholder + '"', 'g'), function (_) {
-    return fns.shift()
-  })
-  return 'var options = ' + json + ';'
 }
 
-var setup = function (swaggerDoc) {
-  return function (event, context, callback) {
+const generateHTML = async (swaggerFile) => {
+    const swaggerInit = jsTplString(swaggerFile)
 
-    console.log("incoming event=" + JSON.stringify(event));
+    const favicon = await fs.readFile(`${absolutePath}/favicon-32x32.png`)
+    const faviconEncoded = Buffer.from(favicon).toString('base64');
 
-    // forward if there is no trailing slash
-    if (event.path.endsWith("/api-docs")) {
-      callback(null, {
-        "statusCode": 301,
-        "isBase64Encoded": false,
-        "headers": {
-          "Location": "api-docs/"
+    return htmlTplString(swaggerInit, faviconEncoded)
+};
+
+
+const proxy_response = (body, headers = {}, statusCode = 200) => {
+    return {statusCode, headers, body}
+}
+
+const setup = async (swaggerFile) => {
+    const swaggerDoc = await fs.readFile(swaggerFile);
+
+    return async function (event, context, callback) {
+
+        debug("incoming event=" + JSON.stringify(event));
+
+        const resource = path.basename(event.path);
+        debug("Request for API DOCS: " + resource);
+
+        if (resource === 'index.html') {
+            return proxy_response(
+                await generateHTML(swaggerFile),
+                {"content-type": "text/html"}
+            );
         }
-      });
-      return;
+
+        // serve swaggerDoc yaml file
+        if (resource === path.basename(swaggerFile)) {
+            debug("Request for the individual swagger doc yaml. Returning string of length " + swaggerDoc.length);
+            return proxy_response(
+                Buffer.from(swaggerDoc).toString(),
+                {"content-type": "text/yaml"}
+            );
+        }
+
+        debug(`Going to read file ${resource} with absolute path ${absolutePath}`);
+
+        try {
+            const data = await fs.readFile(`${absolutePath}/${resource}`)
+            debug("Read file successfully. length=" + data.length);
+
+            return proxy_response(
+                Buffer.from(data).toString(),
+                {"content-type": contentType(path.extname(resource))},
+                200,
+            );
+
+        } catch (e) {
+            return proxy_response(
+                "not found",
+                {"content-type": "text/plain"},
+                404,
+            );
+        }
     }
-
-    var startIndex = event.path.indexOf("/api-docs/");
-    if (startIndex == -1) {
-      callback(null, {
-        "statusCode": 404,
-        "isBase64Encoded": false,
-        "headers": {
-          "content-type": "text/plain"
-        },
-        "body": "not found"
-      });
-      return;
-    }
-
-    var apipath = event.path.substring(startIndex + 10);
-    console.log("Request for API DOCS: " + apipath);
-
-    // serve swagger-ui-init.js
-    if (apipath == 'swagger-ui-init.js') {
-      var options = {
-        "swaggerUrl": "interface.yaml"
-      };
-      callback(null, {
-        "statusCode": 200,
-        "isBase64Encoded": false,
-        "headers": {
-          "content-type": "application/javascript"
-        },
-        "body": jsTplString.toString().replace('<% swaggerOptions %>', "options=" + JSON.stringify(options) + ";")
-      });
-      return;
-    }
-
-    // serve index.html
-    if (apipath == '' || apipath == 'index.html') {
-      callback(null, {
-        "statusCode": 200,
-        "isBase64Encoded": false,
-        "headers": {
-          "content-type": "text/html"
-        },
-        "body": generateHTML("interface.yaml")
-      });
-      return;
-    }
-
-    var filename = undefined;
-
-    // serve individual yaml file
-    if (apipath == 'interface.yaml') {
-      console.log("Request for the individual interface yaml. Returning string of length " + swaggerDoc.length);
-      callback(null, {
-        "statusCode": 200,
-        "isBase64Encoded": true,
-        "headers": {
-          "content-type": "text/yaml"
-        },
-        "body": Buffer.from(swaggerDoc).toString('base64')
-      });
-      return;
-    }
-
-    // serve all other files
-    var filename = apipath;
-
-    var contentType = "text/plain";
-    if (filename.endsWith(".js")) {
-      contentType = "application/javascript";
-    } else if (filename.endsWith(".html")) {
-      contentType = "text/html";
-    } else if (filename.endsWith(".png")) {
-      contentType = "image/png";
-    } else if (filename.endsWith(".css")) {
-      contentType = "text/css";
-    }
-
-    console.log("Going to read file " + filename);
-
-    const absolutePath = swaggerUi.getAbsoluteFSPath();
-    console.log("using absolute path: " + absolutePath);
-
-    fs.readFile(absolutePath + "/" + filename, (err, data) => {
-      if (err) {
-        console.log("Error reading file " + err);
-        callback(null, {
-          "statusCode": 404,
-          "isBase64Encoded": false,
-          "headers": {
-            "content-type": "text/plain"
-          },
-          "body": "not found"
-        });
-        return;
-      }
-      console.log("Read file successfully. length=" + data.length);
-      callback(null, {
-        "statusCode": 200,
-        "isBase64Encoded": true,
-        "headers": {
-          "content-type": contentType
-        },
-        "body": Buffer.from(data).toString("base64")
-      });
-    });
-  }
 };
 
 module.exports = {
-  setup: setup,
-  generateHTML: generateHTML
+    setup,
+    generateHTML
 }
