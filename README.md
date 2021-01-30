@@ -48,6 +48,7 @@ Once deployed, access your swagger ui at : `https://your-api-gateway-endpoint/yo
 
 Because API Gateway doesn't match the root folder with {proxy+} definition, your default URL should contain index.html.
 We suggest creating a mock integration on your main folder to return a 301. (ex: /docs => 301 => /docs/index.html)
+I explain and provide the terraform code to achieve this in this post [How to easily create a HTTP 301 redirection with AWS API Gateway](https://sylwit.medium.com/how-to-easily-create-a-http-301-redirection-with-aws-api-gateway-2bf2874ef3f2)
 
 ## Logs
 
