@@ -1,28 +1,36 @@
 {
-  "name": "aws-serverless-swagger-ui",
+  "name": "swagger-ui-serverless",
   "description": "Serverless version of Swagger UI served by AWS API Gateway and lambda",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "main": "./index.js",
-  "homepage": "https://github.com/sylwit/aws-serverless-swagger-ui",
+  "homepage": "https://github.com/strelov1/swagger-ui-serverless",
   "author": {
-    "name": "Sylvain Witmeyer",
-    "email": "sylvain.witmeyer@gmail.com"
+    "name": "Ilya Strelov",
+    "email": "strelov1@gmail.com",
+    "url": "https://github.com/strelov1"
   },
   "contributors": [
-    "Klaus Lochmann <klaus.lochmann@gmail.com>"
+    {
+      "name": "Klaus Lochmann",
+      "email": "klaus.lochmann@gmail.com"
+    },
+    {
+      "name": "Sylvain Witmeyer",
+      "email": "sylvain.witmeyer@gmail.com"
+    }
   ],
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@github.com/sylwit/aws-serverless-swagger-ui.git"
+    "url": "git+ssh://git@github.com/strelov1/swagger-ui-serverless.git"
   },
   "private": false,
   "bugs": {
-    "url": "https://github.com/sylwit/aws-serverless-swagger-ui/issues"
+    "url": "https://github.com/strelov1/swagger-ui-serverless/issues"
   },
   "bundleDependencies": false,
   "dependencies": {
-    "swagger-ui-dist": "^3.38.0"
+    "swagger-ui-dist": "^4.1.3"
   },
   "deprecated": false,
   "files": [
