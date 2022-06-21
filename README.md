@@ -13,7 +13,7 @@ You may be also interested in:
 Install using npm:
 
 ```bash
-$ npm install swagger-ui-aws-apigateway
+$ npm install serverless-swagger-ui
 ```
 
 Configure your API Gateway:
@@ -24,25 +24,13 @@ Configure your API Gateway:
 In your AWS lambda function, include this package as follows:
 
 ```javascript
-const swaggerUi = require('swagger-ui-aws-apigateway');
-const fs = require('fs');
-
-// read your yaml file and initialize
-const swaggerDocument = fs.readFileSync('./interface/service_interface.yaml');
-var swaggerHandler = swaggerUi.setup(swaggerDocument);
+import swaggerUi from 'aws-serverless-swagger-ui';
 
 // call the swagger api doc in your handler
 
 exports.handler = (event, context, callback) => {
-
-   if (event.path.includes("/api-docs")) {
-        console.log("Got request to the api docs.");
-        swaggerHandler(event, context, callback);
-        return;
-    }
-
-    // ... your other code ...
-
+    const swaggerHandler = swaggerUi.setup('openapi.def.yml');
+    return (await swaggerHandler)(event, context, callback);
 }
 ```
 

@@ -1,42 +1,45 @@
 {
+  "name": "serverless-swagger-render",
+  "description": "Serverless version of Swagger UI served by AWS API Gateway and lambda",
+  "version": "1.0.2",
+  "main": "./index.js",
+  "homepage": "https://github.com/strelov1/serverless-swagger-render",
   "author": {
-    "name": "Klaus Lochmann",
-    "email": "klaus.lochmann@gmail.com"
+    "name": "Ilya Strelov",
+    "email": "strelov1@gmail.com"
   },
+  "contributors": [
+    "Klaus Lochmann <klaus.lochmann@gmail.com>",
+    "Sylvain Witmeyer sylvain.witmeyer@gmail.com"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/strelov1/serverless-swagger-render.git"
+  },
+  "private": false,
   "bugs": {
-    "url": "https://github.com/klauslochmann/swagger-ui-aws-apigateway/issues"
+    "url": "https://github.com/strelov1/serverless-swagger-render/issues"
   },
   "bundleDependencies": false,
   "dependencies": {
-    "swagger-ui-dist": "^4.1.3",
-    "fs": "0.0.1-security"
+    "swagger-ui-dist": "^3.38.0"
   },
   "deprecated": false,
-  "description": "Swagger UI AWS API Gateway",
-  "engines": {
-    "node": ">= v0.10.32"
-  },
   "files": [
     "package.json",
     "index.js",
     "LICENSE"
   ],
-  "homepage": "https://github.com/klauslochmann/swagger-ui-aws-apigateway",
   "keywords": [
     "swagger",
+    "open api",
     "api gateway",
     "aws",
+    "lambda",
     "ui",
-    "json",
-    "documentation"
-  ],
-  "license": "MIT",
-  "main": "./index.js",
-  "name": "swagger-ui-aws-apigateway",
-  "private": false,
-  "repository": {
-    "type": "git",
-    "url": "git+ssh://git@github.com/klauslochmann/swagger-ui-aws-apigateway.git"
-  },
-  "version": "1.0.1"
+    "yaml",
+    "documentation",
+    "serverless"
+  ]
 }
