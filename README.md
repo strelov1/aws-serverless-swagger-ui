@@ -18,7 +18,7 @@ this version focus on :
 ## Install
 
 ```bash
-npm install serverless-swagger-render
+npm install swagger-ui-serverless
 ```
 
 ## Usage
@@ -32,7 +32,7 @@ Configure your API Gateway:
 In your AWS lambda function, include this package as follows:
 
 ```javascript
-import swaggerUi from 'serverless-swagger-render';
+import swaggerUi from 'swagger-ui-serverless';
 
 exports.handler = async (event, context, callback) => {
     const swaggerHandler = swaggerUi.setup('openapi.def.yml');
